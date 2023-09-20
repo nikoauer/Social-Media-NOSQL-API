@@ -1,4 +1,4 @@
-const { User, Thought } = require('../models');
+const { User } = require('../models/index');
 
 module.exports = {
     // this gets all the users 
@@ -15,8 +15,8 @@ module.exports = {
         try {
           const userData = await User.create(req.body);
           res.json(userData);
-        } catch (err) {
-          res.status(500).json(err);
+        } catch (error) {
+          res.status(500).json(error);
         }
       },
       // this retrieves a specific user
