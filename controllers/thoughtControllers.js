@@ -15,7 +15,7 @@ module.exports = {
     async getsingleThought(req, res) {
     try {
         const thoughts = await Thought.findOne({ _id: req.params.thoughtId })
-        .select('-__v');
+        .select('-__v').populate("reactions");
 
         if (!thoughts) {
         return res.status(404).json({ message: 'No thought with that ID' });
@@ -79,24 +79,38 @@ module.exports = {
             res.status(500).json(error);
         }
     },
-
-    //needs to be fixed
-    async postReaction ({ req, body}, res) {
+// This adds a reaction to a thought
+    async postReaction ({ params, body}, res) {
         try {
-            const reaction = Thought.findOneAndUpdate(
-                {_id: req.thoughtId},
-                {$addToSet: {reactions: body}},
+            const reaction = await Thought.findOneAndUpdate(
+                {_id: params.thoughtId},
+                { $addToSet: {reactions: body}},
                 { new: true, runValidators: true }
                 )
-
             if(!reaction) {
                 res.status(404).json({ message: 'No thoughts with this id!' });
             }
-            res.json(dbThoughtData);
+            res.json(reaction);
         } catch (error) {
             res.status(500).json(error);
             console.log(error)
-            console.log(req.thoughtId)
+        }
+    },
+    // this deletes reactions of a thought
+    async deleteReaction ({ params, body }, res) {
+        try {
+            const deleteReaction = await Thought.findOneAndUpdate(
+                { _id: params.thoughtId },
+                { $pull: {reactions: body} },
+                { runValidators: true, new: true }
+                )
+                if(!deleteReaction) {
+                    res.status(404).json({ message: 'No thoughts with this id!' });
+                }
+                res.json(deleteReaction);
+        } catch (error) {
+            console.status(500).json(error)
+            console.log(error)
         }
     }
 }
