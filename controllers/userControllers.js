@@ -23,7 +23,7 @@ module.exports = {
       async getsingleUser(req, res) {
         try {
           const user = await User.findOne({ _id: req.params.userId })
-            .select('-__v');
+            .select('-__v').populate("friends");
     
           if (!user) {
             return res.status(404).json({ message: 'No user with that ID' });
@@ -64,5 +64,44 @@ module.exports = {
         } catch (error) {
             res.status(500).json(error);
         }
+    },
+    //this will add a new friend
+    async addNewFriend({ params }, res) {
+      try {      
+        const addfriend = await User.findOneAndUpdate(
+        { _id: params.userId },
+        { $push: { friends: params.friendId } },
+        { runValidators: true, new: true }
+      )
+      console.log(addfriend)
+          if (!addfriend) {
+            res.status(404).json({ message: "No user with this id" });
+            return;
+          }
+          res.json(addfriend);
+        } catch (error){
+          logDivider()
+          console.log(error)
+            res.status(500).json(error);
+      }
+    },
+    //this will delete a friend from a userID
+    async deleteFriends ({ params }, res) {
+      try {
+      const deleteFriend = await User.findOneAndUpdate(
+        { _id: params.userId},
+        { $pull: {friends: params.friendId} },
+        { runValidators: true, new: true }
+        )
+        console.log(deleteFriend);
+        if(!deleteFriend) {
+          res.status(500).json({ message: "friend not found to be deleted!"})
+        }
+        res.json(deleteFriend)
+      } catch (error) {
+        res.status(500).json(error)
+        console.log(error)
+      }
     }
-};
+  }
+
