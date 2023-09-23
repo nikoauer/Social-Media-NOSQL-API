@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { formatTimestamp } = require('../utils/formatTime')
 
 const reactionSchema = new Schema({
     reactionId: {
@@ -18,7 +19,7 @@ const reactionSchema = new Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        //get: (timestamp) => dateFormat(timestamp)
+        get: (timestamp) => formatTimestamp(timestamp)
     }
 }, {
     toJSON: {
